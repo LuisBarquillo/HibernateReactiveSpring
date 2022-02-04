@@ -25,6 +25,11 @@ public class WebFluxController {
         return repository.findAll();
     }
 
+    @GetMapping("/multiple/search")
+    public Flux<Customer> getMultipleByText(@RequestParam String text) {
+        return repository.findByName(text);
+    }
+
     @PostMapping("/insert")
     public Mono<Customer> insertData(@RequestBody String name) {
         return repository.createCustomer(name);

@@ -1,6 +1,7 @@
 package com.cognizant.server.repositories;
 
 import com.cognizant.server.entities.Customer;
+import com.cognizant.server.entities.Customer_;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.UniReactorConverters;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -10,6 +11,9 @@ import reactor.core.publisher.Mono;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 @Repository
 public class CustomerRepository {
@@ -21,6 +25,10 @@ public class CustomerRepository {
 
     private Uni<Mutiny.StatelessSession> getSession() {
         return getSessionFactory().openStatelessSession();
+    }
+
+    private CriteriaBuilder getCriteriaBuilder() {
+        return getSessionFactory().getCriteriaBuilder();
     }
 
     private <T> Mono<T> persist(T item) {
@@ -46,7 +54,19 @@ public class CustomerRepository {
                 .flatMapMany(Flux::fromIterable);
     }
 
-    // TODO: Implement criteria queries
+    public Flux<Customer> findByName(String text) {
+        CriteriaBuilder cb = getCriteriaBuilder();
+        CriteriaQuery<Customer> query = cb.createQuery(Customer.class);
+        Root<Customer> root = query.from(Customer.class);
+        query.where(cb.like(root.get(Customer_.NAME), "%" + text + "%"));
+
+        return getSession().chain(session -> session.createQuery(query)
+                        .getResultList()
+                        .eventually(session::close))
+                .convert()
+                .with(UniReactorConverters.toMono())
+                .flatMapMany(Flux::fromIterable);
+    }
 
     public Mono<Customer> updateCustomer(Long id, Customer c) {
         return getSession().chain(session -> session.get(Customer.class, id)

@@ -1,5 +1,7 @@
 package com.cognizant.server.repositories;
 
+import com.cognizant.server.entities.City;
+import com.cognizant.server.entities.City_;
 import com.cognizant.server.entities.Customer;
 import com.cognizant.server.entities.Customer_;
 import io.smallrye.mutiny.Uni;
@@ -13,6 +15,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
 @Repository
@@ -54,11 +57,12 @@ public class CustomerRepository {
                 .flatMapMany(Flux::fromIterable);
     }
 
-    public Flux<Customer> findByName(String text) {
+    public Flux<Customer> findByCity(String searchTerm) {
         CriteriaBuilder cb = getCriteriaBuilder();
         CriteriaQuery<Customer> query = cb.createQuery(Customer.class);
         Root<Customer> root = query.from(Customer.class);
-        query.where(cb.like(root.get(Customer_.NAME), "%" + text + "%"));
+        Join<Customer, City> city = root.join(Customer_.CITY);
+        query.where(cb.like(city.get(City_.NAME), "%" + searchTerm + "%"));
 
         return getSession().chain(session -> session.createQuery(query)
                         .getResultList()

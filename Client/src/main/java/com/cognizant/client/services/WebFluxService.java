@@ -19,7 +19,8 @@ public class WebFluxService {
         Mono<Customer> data = client.get().uri("/webflux/simple/" + id.toString()).retrieve().bodyToMono(Customer.class);
         data.subscribe(s -> LogFactory.getLog(WebFluxService.class).info(s.getName()));
 
-        // This log should be shown before the name of the Customer, as at this point, the request has not been resolved.
+        // This log should be shown before the name of the Customer, as at this point,
+        // the request has not been resolved.
         LogFactory.getLog(WebFluxService.class).info("Request completed");
     }
 

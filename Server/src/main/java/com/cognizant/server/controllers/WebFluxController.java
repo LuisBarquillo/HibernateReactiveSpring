@@ -26,8 +26,8 @@ public class WebFluxController {
     }
 
     @GetMapping("/multiple/search")
-    public Flux<Customer> getMultipleByText(@RequestParam String text) {
-        return repository.findByName(text);
+    public Flux<Customer> getMultipleByText(@RequestParam String city) {
+        return repository.findByCity(city);
     }
 
     @PostMapping("/insert")

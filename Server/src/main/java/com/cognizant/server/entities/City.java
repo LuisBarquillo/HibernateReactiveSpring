@@ -5,12 +5,11 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-@Table(name = "customers")
+@Table(name = "city")
 @Entity
 @Getter
 @Setter
-public class Customer {
-
+public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name="id")
@@ -18,8 +17,4 @@ public class Customer {
 
     @Column(name="name")
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "city")
-    private City city;
 }
